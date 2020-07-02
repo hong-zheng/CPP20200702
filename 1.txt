@@ -1,0 +1,589 @@
+#define _CRT_SECURE_NO_WARNINGS 1
+#include <iostream>
+using namespace std;
+
+template<class T>
+class BSTNode{
+public:
+	T _val;
+	BSTNode<T>* _left;
+	BSTNode<T>* _right;
+
+	BSTNode(const T& val)
+		:_val(val)
+		, _left(nullptr)
+		, _right(nullptr)
+	{}
+};
+
+template<class T>
+class BSTree{
+public:
+	typedef BSTNode<T> Node;
+
+	Node* find(const T& val){
+		Node* cur = _root;
+		while (cur){
+			if (cur->_val == val){
+				return cur;
+			}
+			else if (cur->_val < val){
+				cur = cur->_right;
+			}
+			else if (cur->_val > val){
+				cur = cur->_left;
+			}
+		}
+		// 查找结束如果不存在就返回 nullptr
+		return nullptr;
+	}
+
+	// 插入
+	
+	bool insert(const T& val){
+		if (_root == nullptr){
+			_root = new Node(val);
+			return  true;
+		}
+		// 查找插入的节点位置
+		Node* cur = _root;
+		Node* parent = nullptr;
+		while (cur){
+			parent = cur;
+			if (cur->_val == val){
+				return false;
+			}
+			else if (cur->_val < val){
+				cur = cur->_right;
+			}
+			else  if (cur->_val > val){
+				cur = cur->_left;
+			}
+		}
+		cur = new Node(val);
+		// 判断放在parent的哪一边
+		if (parent->_val < val){
+			parent->_right = cur;
+		}
+		else{
+			parent->_left = cur;
+		}
+		return true;
+	}
+
+	void destroy(Node* root){
+		if (root){
+			destroy(root->_left);
+			destroy(root->_right);
+			delete root;
+		}
+	}
+	~BSTree()
+	{
+		// 析构函数需要一个点一个点的析构，将每一个点都释放
+		destroy(_root);// 析构函数无法递归，所以外面嵌入一个destroy
+	}
+
+	// 遍历的过程中创建节点
+	void copyTree(Node* root){
+		if (root){
+			insert(root->_val);
+			copyTree(root->_left);
+			copyTree(root->_right);
+		}
+	}
+
+	//深拷贝，用于拷贝构造，不会存在二次释放的问题
+	Node* copyTree2(Node* root){
+		if (root){
+			Node* cur = new Node(root->_val);
+			cur->_left = copyTree2(root->_left);
+			cur->_right = copyTree2(root->_right);
+			return cur;
+		}
+		return nullptr;
+	}
+	BSTree() :_root(nullptr){}
+	// 实现拷贝函数,拷贝节点与其结构，可以逐个插入
+	// 深拷贝，拷贝构造
+	BSTree(const BSTree<T>& bst)
+	:_root(nullptr)
+	{
+		_root = copyTree2(bst._root);
+	}
+
+	// 现代写法,代码复用
+	// 在参数中做一个拷贝构造，然后再进行交换
+	// 先调用拷贝构造创建局部对象，然后再将局部对象与当前对象相互交换，完成拷贝
+	BSTree<T>& operator=(BSTree<T> bst){
+		swap(_root, bst._root);
+		return *this;
+	}
+
+	// 经典写法
+	BSTree<T> operator=(const BSTree<T>& bst){
+		if (this != &bst){
+			destroy(_root);
+			_root = copyTree2(bst._root);
+		}
+		return *this;
+	}
+	
+	//中序遍历
+	void _inorder(Node*  root){
+		if (nullptr == root){
+			return nullptr;
+		}
+		_inorder(root->_left);
+		cout << root->_val << " ";
+		_inorder(root->_right);
+	}
+	void inorder(){
+		_inorder(_root);
+		cout << endl;
+	}
+private:
+	T* _root=nullptr;
+};
+
+int main(){
+
+	while (1);
+	return 0;
+}
+
+//template<class T>
+//struct BSTNode{
+//	T _val;
+//	BSTNode<T>* _left;
+//	BSTNode<T>* _right;
+//
+//	BSTNode(const T& val = T())
+//		:_val(val)
+//		, _left(nullptr)
+//		, _right(nullptr)
+//	{}
+//};
+//
+//template<class T>
+//class BSTree{
+//public:
+//	typedef BSTNode<T> Node;
+//
+//	Node* find(const T& val){
+//		Node* cur = _root;
+//		while (cur){
+//			if (cur->_val == val){
+//				return cur;
+//			}
+//			else if (cur->_val < val){
+//				cur = cur->_left;
+//			}
+//			else{
+//				cur = cur->_right;
+//			}
+//		}
+//		return nullptr;
+//	}
+//
+//	// 插入操作
+//	bool insert(const T& val){
+//		if (_root == nullptr){
+//			_root = new Node(val);
+//			return true;
+//		}
+//		Node* cur = _root;
+//		Node* parent = nullptr;
+//
+//		while (cur){
+//			parent = cur; 
+//			if (cur->_val == val){
+//				return false;
+//			}
+//			else if (cur->_val < val){
+//				cur = cur->_right;
+//			}
+//			else{
+//				cur = cur->_left;
+//			}
+//		}
+//
+//		cur = new Node(val);
+//		//判断放在parent的哪一边
+//		if (parent->_val < val){
+//			parent->_right = cur;
+//		}
+//		else{
+//			parent->_left = cur;
+//		}
+//		return true;
+//	}
+//
+//	bool insert_node(const T& val = T()){
+//		if (_root == nullptr){
+//			_root = new Node(val);
+//			return true;
+//		}
+//		Node* cur = _root;
+//		Node* parent = nullptr;
+//		while (cur){
+//			parent = cur;
+//			if (cur->_val == val){
+//				return false;
+//			}
+//			else if (cur->_val < val){
+//				cur = cur->_right;
+//			}
+//			else {
+//				cur = cur->_left;
+//			}
+//		}
+//
+//		cur = new Node(val);
+//		if (val < parent->_val){
+//			parent->_left = cur;
+//		}
+//		else {
+//			parent->_right = cur;
+//		}
+//		return true;
+//	}
+//
+//
+//	void zxbl(Node* root){
+//		if (root){
+//
+//		}
+//	}
+//
+//
+//
+//	bool erase(const T& val){
+//		// 查找
+//		Node* cur = _root;
+//		Node* parent = nullptr;
+//
+//		while (cur){
+//			if (cur->_val == val)
+//				break;
+//			else if (cur->_val < val){
+//				parent = cur;
+//				cur = cur->_right;
+//			}
+//			else {
+//				parent = cur;
+//				cur = cur->_left;
+//			}
+//		}
+//		// 判断是否找到了需要删除的节点
+//		if (cur == nullptr){
+//			return false;
+//		}
+//		// 删除
+//		// 叶子
+//		if (cur->_left == nullptr && cur->_right == nullptr){
+//			if (cur == _root){
+//				// 如果是根节点，更新根节点
+//				_root = nullptr;
+//			}
+//			else{
+//				if (parent->_left == cur){
+//					parent->_left = nullptr;
+//				}
+//				else{
+//					parent->_right = nullptr;
+//				}
+//				delete cur;
+//			}
+//		}
+//
+//		//度为1的节点，分为左边为空或者右边为空
+//		else if (cur->_left == nullptr){
+//			// 左孩子为空
+//			if (cur == _root){
+//				_root = cur->_right;
+//			}
+//			else{
+//				if (parent->_left == cur){
+//					parent->_left = cur->_right;
+//				}
+//				else{
+//					parent->_right = cur->_right;
+//				}
+//			}
+//		}
+//		else if (cur->_right == nullptr){
+//			// 右孩子为空
+//			if (cur == _root){
+//				_root = cur->_left;
+//			}
+//			else{
+//				if (parent)
+//			}
+//
+//			delete cur;
+//		}
+//		else {
+//
+//		// 左右孩子都存在
+//			//1、找最左或者最后节点
+//			Node* leftMostChild = cur->_right;
+//		//找右子树最左节点
+//			Node* parent = cur;
+//			while (leftMostChild){
+//				parent = leftMostChild;
+//				leftMostChild = leftMostChild->_left;
+//			}
+//			// 2、值替换
+//			cur->_val = leftMostChild->_val;
+//			// 3、删除最左或者最右节点
+//			parent->_left = leftMostChild->_right;
+//			delete leftMostChild;
+//		}
+//		return true;
+//	}
+//
+//	void destroy(Node* root){
+//		if (root){
+//			destroy(root->_left);
+//			destroy(root->_right);
+//			delete root;
+//		}
+//	}
+//
+//	~BSTree()
+//	{
+//		//需要释放每一个节点
+//		destroy(_root);
+//	}
+//
+//
+//	void copyTree(Node* root){
+//		if (root){
+//			
+//		}
+//	}
+//	//BSTTree(const BSTree<T>& bst){
+//
+//	//}
+//
+//	bool erase_new(const T& val){
+//		// 查找	
+//		Node* cur = _root;
+//		Node* parent = nullptr;
+//		while (cur){
+//			// 先判断再更新
+//			if (cur->_val == val){
+//				break;
+//			}
+//			else if (cur->_val < val){
+//				parent = cur; 
+//				cur = cur->_right;
+//			}
+//			else{
+//				parent = cur;
+//				cur = cur->_left;
+//			}
+//		}
+//		// 判断是否找到需要删除的节点
+//		if (nullptr == cur) return false;
+//		// 删除
+//		// 1、删除叶子节点
+//		if (cur->_left == nullptr && cur->_right == nullptr){
+//			if (_root == cur){// 当前节点为根节点
+//				//需要更新根节点
+//				_root = nullptr;
+//			}
+//			else{
+//				if (parent->_left == cur){
+//					parent->_left = nullptr;
+//				}
+//				else{
+//					parent->_right = nullptr;
+//				}
+//				delete cur;
+//			}
+//		}
+//		// 度为1的节点
+//		else if (cur->_left == nullptr){ //先删除左孩子为空
+//			// 2、左孩子为空
+//			if (cur == _root){
+//				_root = cur->_right;
+//			}
+//			else{
+//				if (parent->_left == cur){
+//					parent->_left = cur->_right;
+//				}
+//				else{
+//					parent->_right = cur->_right;
+//				}
+//			}
+//			delete cur;
+//		}
+//		// 删除孩子的右边节点为空
+//		else if (cur->_right == nullptr){
+//			if (cur == _root){
+//				_root = cur->_left;
+//			}
+//			else{
+//				if (parent->_left == cur){
+//					parent->_left = cur->_left;
+//				}
+//				else{
+//					parent->_right = cur->_left;
+//				}
+//			}
+//			delete cur;
+//		}
+//		// 删除度为2的节点
+//		else
+//		{//左右孩子都存在
+//			// 1、找最左或者最右节点
+//			// 找右子树最左节点
+//			Node* leftMostChild = cur->_right;
+//			Node* parent = cur;
+//			while (leftMostChild->_left){
+//				parent = leftMostChild;
+//				leftMostChild = leftMostChild->_left;
+//			}
+//			// 2、值替换
+//			cur->_val = leftMostChild->_val;
+//			// 3、删除最左或者最右节点
+//			if (parent->_left == leftMostChild){
+//				parent->_left = leftMostChild->_right;
+//			}
+//			else{
+//				parent->_right = leftMostChild->_right;
+//			}
+//			delete leftMostChild;
+//		}
+//		return true;
+//	}
+//
+//	// 删除搜索树中的val节点
+//	bool erase_01(const T& val){
+//		//先搜索树中查询是否存在值为val的节点
+//		Node* cur = _root;
+//		Node* parent = nullptr;
+//		while (cur){
+//			if (cur->_val == val){
+//				break;
+//			}
+//			else if (cur->_val < val){
+//				parent = cur;
+//				cur = cur->_right;
+//			}
+//			else if (cur->_val > val){
+//				parent = cur;
+//				cur = cur->_left;
+//			}
+//		}
+//		// 搜索完了之后如果没有该节点，表示删除失败
+//		if (cur == nullptr) return false;
+//
+//		// 进行删除操作
+//		// 1、没有左右孩子
+//		if (cur->_left == nullptr && cur->_right == nullptr){
+//			if (cur == _root){
+//				_root = nullptr;
+//			}
+//			else{
+//				if (parent->_left == cur){
+//					parent->_left = nullptr;
+//				}
+//				else{
+//					parent->_right = nullptr;
+//				}
+//			}
+//			delete cur;
+//		}
+//		// 2、只有一个孩子
+//		// 2.1 只有左孩子
+//		else if (cur->_right == nullptr){
+//			if (cur == _root){
+//				_root = cur->_left;
+//			}
+//			else{
+//				if (cur == parent->_left){
+//					parent->_left = cur->_left;
+//				}
+//				else{
+//					parent->_right = cur->_left;
+//				}
+//			}
+//			delete cur;
+//		}
+//		// 2.2 只有右孩子
+//		else if (cur->_left == nullptr){
+//			if (cur == _root){
+//				_root = cur->_right;
+//			}
+//			else{
+//				if (cur == parent->_left){
+//					parent->_left = cur->_right;
+//				}
+//				else {
+//					parent->_right = cur->_right;
+//				}
+//			}
+//			delete cur;
+//		}
+//		// 3、有两个孩子
+//		else{
+//			//1、找到左子树的最右节点或者找到右子树的最左节点
+//			// 找右子树的最左节点
+//			Node* leftMostNode = cur->_right;
+//			parent = cur;
+//			while (leftMostNode->_left){
+//				parent = leftMostNode;
+//				leftMostNode = leftMostNode->_left;
+//			}
+//			//2、和被删除节点做值替换
+//			cur->_val = leftMostNode->_val;
+//			//3、然后再删除该节点
+//			if (parent->_left == leftMostNode){
+//				parent->_left = leftMostNode->_right;
+//			}
+//			else{
+//				parent->_right = leftMostNode->_right;
+//			}
+//			delete leftMostNode;
+//		}
+//		return true;
+//	}
+//private:
+//	Node* _root = nullptr;
+//};
+//
+//void test(){
+//	BSTree<int> bst;
+//	bst.insert(5);
+//	bst.insert(3);
+//	bst.insert(7);
+//	bst.insert(1);
+//	bst.insert(4);
+//	bst.insert(6);
+//	bst.insert(8);
+//	bst.insert(0);
+//	bst.insert(2);
+//	bst.insert(9);
+//
+//
+//	bst.erase_01(5);
+//	bst.erase_01(7);
+//	bst.erase_01(3);
+//	bst.erase_01(0);
+//
+//}
+//int main(){
+//	test();
+//	//int i = 0;
+//	//int* k = new int;
+//	//for (; i < 10;++i);
+//	//cout << *k << endl;
+//	while (1);
+//	return 0;
+//}
+
+
+
